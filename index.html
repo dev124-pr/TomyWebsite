@@ -511,220 +511,255 @@
         </div>
     </footer>
 
-    <script>
-        const modal = document.getElementById('reviewModal');
-        const openBtn = document.getElementById('openReviewModal');
-        const closeBtn = document.getElementById('closeReviewModal');
-        const reviewForm = document.getElementById('reviewForm');
-        const reviewsGrid = document.getElementById('reviewsGrid');
-        const reviewerNameInput = document.getElementById('reviewerName');
-        const accountButton = document.getElementById('accountButton');
-        const accountButtonText = document.getElementById('accountButtonText');
-        const profileModal = document.getElementById('profileModal');
-        const closeProfileModal = document.getElementById('closeProfileModal');
-        const profileForm = document.getElementById('profileForm');
-        const profileNameInput = document.getElementById('profileName');
-        const supabaseUrl = 'https://dfokcbgnjlmdnpbrocel.supabase.co';
-        const supabasePublishableKey = 'sb_publishable_PEIVPJZOX4AuA7vSymyxMQ_YLeXbpoy';
-        const supabaseClient = window.supabase.createClient(supabaseUrl, supabasePublishableKey);
-        
-        let selectedRating = 5;
-        let currentUser = null;
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-        function updateUserInterface() {
-            const name = currentUser ? currentUser.name : '';
-            reviewerNameInput.value = name;
-            accountButtonText.textContent = name || 'יצירת משתמש';
+<script>
+    const modal = document.getElementById('reviewModal');
+    const openBtn = document.getElementById('openReviewModal');
+    const closeBtn = document.getElementById('closeReviewModal');
+    const reviewForm = document.getElementById('reviewForm');
+    const reviewsGrid = document.getElementById('reviewsGrid');
+    const reviewerNameInput = document.getElementById('reviewerName');
+    const accountButton = document.getElementById('accountButton');
+    const accountButtonText = document.getElementById('accountButtonText');
+    const profileModal = document.getElementById('profileModal');
+    const closeProfileModal = document.getElementById('closeProfileModal');
+    const profileForm = document.getElementById('profileForm');
+    const profileNameInput = document.getElementById('profileName');
+
+    const supabaseUrl = 'https://dfokcbgnjlmdnpbrocel.supabase.co';
+    const supabasePublishableKey = 'sb_publishable_PEIVPJZOX4AuA7vSymyxMQ_YLeXbpoy';
+    const supabaseClient = window.supabase.createClient(
+        supabaseUrl,
+        supabasePublishableKey
+    );
+
+    let selectedRating = 5;
+    let currentUser = null;
+
+    function updateUserInterface() {
+        const name = currentUser ? currentUser.name : '';
+        reviewerNameInput.value = name;
+        accountButtonText.textContent = name || 'יצירת משתמש';
+    }
+
+    function openProfileModal() {
+        profileNameInput.value = currentUser ? currentUser.name : '';
+        profileModal.style.display = 'flex';
+        profileNameInput.focus();
+    }
+
+    async function loadUser() {
+        let savedProfile = null;
+
+        try {
+            savedProfile = JSON.parse(localStorage.getItem('falcon_user'));
+        } catch {
+            savedProfile = null;
         }
 
-        function openProfileModal() {
-            profileNameInput.value = currentUser ? currentUser.name : '';
-            profileModal.style.display = 'flex';
-            profileNameInput.focus();
+        let { data: { user }, error } = await supabaseClient.auth.getUser();
+
+        if (!user && !error) {
+            const signIn = await supabaseClient.auth.signInAnonymously();
+            user = signIn.data.user;
+            error = signIn.error;
         }
 
-        async function loadUser() {
-            let savedProfile = null;
-            try {
-                savedProfile = JSON.parse(localStorage.getItem('falcon_user'));
-            } catch {
-                savedProfile = null;
-            }
-
-            let { data: { user }, error } = await supabaseClient.auth.getUser();
-            if (!user && !error) {
-                const signIn = await supabaseClient.auth.signInAnonymously();
-                user = signIn.data.user;
-                error = signIn.error;
-            }
-
-            if (error || !user) {
-                console.error('לא ניתן ליצור משתמש:', error?.message);
-                currentUser = null;
-                return;
-            }
-
-            currentUser = { id: user.id, name: savedProfile?.name || '' };
-            updateUserInterface();
+        if (error || !user) {
+            console.error('לא ניתן ליצור משתמש:', error?.message);
+            alert('יש להפעיל Anonymous Sign-ins ב-Supabase.');
+            currentUser = null;
+            return;
         }
 
-        async function loadReviews() {
-            const { data: reviews, error } = await supabaseClient
+        currentUser = {
+            id: user.id,
+            name: savedProfile?.name || ''
+        };
+
+        updateUserInterface();
+    }
+
+    async function loadReviews() {
+        const { data: reviews, error } = await supabaseClient
+            .from('reviews')
+            .select('name, rating, text, created_at')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('לא ניתן לטעון ביקורות:', error.message);
+            reviewsGrid.innerHTML =
+                '<div class="no-reviews">לא ניתן לטעון ביקורות כרגע.</div>';
+            return;
+        }
+
+        renderReviews(reviews);
+    }
+
+    function renderReviews(reviews) {
+        reviewsGrid.innerHTML = '';
+
+        if (!reviews || reviews.length === 0) {
+            reviewsGrid.innerHTML = `
+                <div class="no-reviews">
+                    עדיין אין ביקורות. היו הראשונים לכתוב ביקורת על האתר!
+                </div>
+            `;
+            return;
+        }
+
+        reviews.forEach(rev => {
+            const firstLetter = rev.name.charAt(0);
+            let starsHtml = '';
+
+            for (let i = 0; i < 5; i++) {
+                starsHtml += i < rev.rating
+                    ? '<i class="fa-solid fa-star"></i>'
+                    : '<i class="fa-regular fa-star"></i>';
+            }
+
+            const card = document.createElement('div');
+            card.className = 'review-card';
+            card.innerHTML = `
+                <div class="review-header">
+                    <div class="avatar"></div>
+                    <div class="reviewer-info">
+                        <h4></h4>
+                        <div class="stars">${starsHtml}</div>
+                    </div>
+                </div>
+                <p></p>
+                <div class="review-time"></div>
+            `;
+
+            card.querySelector('.avatar').textContent = firstLetter;
+            card.querySelector('h4').textContent = rev.name;
+            card.querySelector('p').textContent = rev.text;
+            card.querySelector('.review-time').textContent =
+                new Date(rev.created_at).toLocaleString('he-IL');
+
+            reviewsGrid.appendChild(card);
+        });
+    }
+
+    openBtn.addEventListener('click', () => {
+        if (!currentUser || !currentUser.name) {
+            openProfileModal();
+            return;
+        }
+
+        modal.style.display = 'flex';
+    });
+
+    accountButton.addEventListener('click', openProfileModal);
+
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    closeProfileModal.addEventListener('click', () => {
+        profileModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+
+        if (event.target === profileModal) {
+            profileModal.style.display = 'none';
+        }
+    });
+
+    profileForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const name = profileNameInput.value.trim();
+
+        if (name.length < 2) {
+            return;
+        }
+
+        if (!currentUser?.id) {
+            alert('יש להפעיל Anonymous Sign-ins ב-Supabase.');
+            return;
+        }
+
+        const oldName = currentUser.name;
+
+        if (oldName && oldName !== name) {
+            const { error } = await supabaseClient
                 .from('reviews')
-                .select('name, rating, text, created_at')
-                .order('created_at', { ascending: false });
+                .update({ name })
+                .eq('user_id', currentUser.id);
 
             if (error) {
-                console.error('לא ניתן לטעון ביקורות:', error.message);
-                reviewsGrid.innerHTML = '<div class="no-reviews">לא ניתן לטעון ביקורות כרגע.</div>';
+                console.error(error.message);
+                alert('לא ניתן לעדכן את השם כרגע.');
                 return;
             }
-
-            renderReviews(reviews);
         }
 
-        function renderReviews(reviews) {
-            reviewsGrid.innerHTML = '';
-            
-            if (reviews.length === 0) {
-                reviewsGrid.innerHTML = `
-                    <div class="no-reviews">
-                        עדיין אין ביקורות. היו הראשונים לכתוב ביקורת על האתר!
-                    </div>
-                `;
-                return;
-            }
+        currentUser.name = name;
+        localStorage.setItem('falcon_user', JSON.stringify({ name }));
 
-            reviews.forEach(rev => {
-                const firstLetter = rev.name.charAt(0);
-                let starsHtml = '';
-                for (let i = 0; i < 5; i++) {
-                    if (i < rev.rating) {
-                        starsHtml += '<i class="fa-solid fa-star"></i>';
-                    } else {
-                        starsHtml += '<i class="fa-regular fa-star"></i>';
-                    }
-                }
+        updateUserInterface();
+        profileModal.style.display = 'none';
+        modal.style.display = 'flex';
 
-                const card = document.createElement('div');
-                card.className = 'review-card';
-                card.innerHTML = `
-                    <div class="review-header">
-                        <div class="avatar"></div>
-                        <div class="reviewer-info">
-                            <h4></h4>
-                            <div class="stars">${starsHtml}</div>
-                        </div>
-                    </div>
-                    <p></p>
-                    <div class="review-time"></div>
-                `;
-                card.querySelector('.avatar').textContent = firstLetter;
-                card.querySelector('h4').textContent = rev.name;
-                card.querySelector('p').textContent = rev.text;
-                card.querySelector('.review-time').textContent = new Date(rev.created_at).toLocaleString('he-IL');
-                reviewsGrid.appendChild(card);
+        loadReviews();
+    });
+
+    const stars = document.querySelectorAll('.star-rating .star');
+
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            selectedRating = Number(star.dataset.value);
+
+            stars.forEach(item => {
+                item.classList.toggle(
+                    'active',
+                    Number(item.dataset.value) <= selectedRating
+                );
             });
+        });
+    });
+
+    reviewForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        if (!currentUser?.id || !currentUser.name) {
+            openProfileModal();
+            return;
         }
 
-        openBtn.addEventListener('click', () => {
-            if (!currentUser || !currentUser.name) {
-                openProfileModal();
-                return;
-            }
-            modal.style.display = 'flex';
-        });
+        const text = document.getElementById('reviewText').value.trim();
 
-        accountButton.addEventListener('click', openProfileModal);
-
-        closeProfileModal.addEventListener('click', () => {
-            profileModal.style.display = 'none';
-        });
-
-        profileForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = profileNameInput.value.trim();
-            if (name.length < 2 || !currentUser?.id) return;
-
-            const oldName = currentUser.name;
-            if (oldName && oldName !== name) {
-                const { error } = await supabaseClient
-                    .from('reviews')
-                    .update({ name })
-                    .eq('user_id', currentUser.id);
-
-                if (error) {
-                    console.error('לא ניתן לעדכן את השם בביקורות:', error.message);
-                    alert('לא ניתן לעדכן את השם כרגע. נסו שוב מאוחר יותר.');
-                    return;
-                }
-            }
-
-            currentUser.name = name;
-            localStorage.setItem('falcon_user', JSON.stringify({ name }));
-            updateUserInterface();
-            profileModal.style.display = 'none';
-            modal.style.display = 'flex';
-            loadReviews();
-        });
-
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-            if (e.target === profileModal) {
-                profileModal.style.display = 'none';
-            }
-        });
-
-        const stars = document.querySelectorAll('.star-rating .star');
-        stars.forEach(star => {
-            star.addEventListener('click', () => {
-                selectedRating = parseInt(star.getAttribute('data-value'));
-                stars.forEach(s => {
-                    if (parseInt(s.getAttribute('data-value')) <= selectedRating) {
-                        s.classList.add('active');
-                    } else {
-                        s.classList.remove('active');
-                    }
-                });
-            });
-        });
-
-        reviewForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!currentUser || !currentUser.name) {
-                openProfileModal();
-                return;
-            }
-            const name = currentUser.name;
-            const text = document.getElementById('reviewText').value.trim();
-
-            const { error } = await supabaseClient.from('reviews').insert({
-                name: name,
+        const { error } = await supabaseClient
+            .from('reviews')
+            .insert({
+                name: currentUser.name,
                 rating: selectedRating,
-                text: text,
+                text,
                 user_id: currentUser.id
             });
 
-            if (error) {
-                console.error('לא ניתן לפרסם ביקורת:', error.message);
-                alert('לא ניתן לפרסם את הביקורת כרגע. נסו שוב מאוחר יותר.');
-                return;
-            }
+        if (error) {
+            console.error(error.message);
+            alert('לא ניתן לפרסם את הביקורת כרגע. נסו שוב מאוחר יותר.');
+            return;
+        }
 
-            reviewForm.reset();
-            modal.style.display = 'none';
-            selectedRating = 5;
-            stars.forEach(s => s.classList.add('active'));
-            loadReviews();
-        });
+        reviewForm.reset();
+        modal.style.display = 'none';
+        selectedRating = 5;
+        stars.forEach(star => star.classList.add('active'));
 
-        loadUser().then(loadReviews);
-    </script>
+        loadReviews();
+    });
+
+    loadUser().then(loadReviews);
+</script>
 </body>
 </html>
