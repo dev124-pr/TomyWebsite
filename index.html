@@ -543,12 +543,28 @@
             profileNameInput.focus();
         }
 
-        function loadUser() {
+        async function loadUser() {
+            let savedProfile = null;
             try {
-                currentUser = JSON.parse(localStorage.getItem('falcon_user'));
+                savedProfile = JSON.parse(localStorage.getItem('falcon_user'));
             } catch {
-                currentUser = null;
+                savedProfile = null;
             }
+
+            let { data: { user }, error } = await supabaseClient.auth.getUser();
+            if (!user && !error) {
+                const signIn = await supabaseClient.auth.signInAnonymously();
+                user = signIn.data.user;
+                error = signIn.error;
+            }
+
+            if (error || !user) {
+                console.error('לא ניתן ליצור משתמש:', error?.message);
+                currentUser = null;
+                return;
+            }
+
+            currentUser = { id: user.id, name: savedProfile?.name || '' };
             updateUserInterface();
         }
 
@@ -625,16 +641,31 @@
             profileModal.style.display = 'none';
         });
 
-        profileForm.addEventListener('submit', (e) => {
+        profileForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = profileNameInput.value.trim();
-            if (name.length < 2) return;
+            if (name.length < 2 || !currentUser?.id) return;
 
-            currentUser = { name };
-            localStorage.setItem('falcon_user', JSON.stringify(currentUser));
+            const oldName = currentUser.name;
+            if (oldName && oldName !== name) {
+                const { error } = await supabaseClient
+                    .from('reviews')
+                    .update({ name })
+                    .eq('user_id', currentUser.id);
+
+                if (error) {
+                    console.error('לא ניתן לעדכן את השם בביקורות:', error.message);
+                    alert('לא ניתן לעדכן את השם כרגע. נסו שוב מאוחר יותר.');
+                    return;
+                }
+            }
+
+            currentUser.name = name;
+            localStorage.setItem('falcon_user', JSON.stringify({ name }));
             updateUserInterface();
             profileModal.style.display = 'none';
             modal.style.display = 'flex';
+            loadReviews();
         });
 
         closeBtn.addEventListener('click', () => {
@@ -676,7 +707,8 @@
             const { error } = await supabaseClient.from('reviews').insert({
                 name: name,
                 rating: selectedRating,
-                text: text
+                text: text,
+                user_id: currentUser.id
             });
 
             if (error) {
@@ -692,8 +724,7 @@
             loadReviews();
         });
 
-        loadUser();
-        loadReviews();
+        loadUser().then(loadReviews);
     </script>
 </body>
 </html>
