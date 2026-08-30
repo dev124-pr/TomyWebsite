@@ -220,6 +220,29 @@
       .support-section, .reviews-section { padding: 45px 20px; }
       .support-grid, .reviews-grid { grid-template-columns: 1fr; }
     }
+
+    .hero .btn-primary {
+    width: fit-content;
+    align-self: flex-start;
+    padding: 12px 24px;
+}
+
+.btn-danger {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid #ff4d4f;
+    border-radius: 8px;
+    background: transparent;
+    color: #ff6b6b;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background: #ff4d4f;
+    color: #ffffff;
+}
   </style>
 </head>
 
@@ -241,7 +264,7 @@
 
     <a href="https://discord.gg/ArYQsPzjSS" target="_blank" class="btn-primary">
       <i class="fa-brands fa-discord"></i>
-      הצטרף לקהילה בדיסקורד
+      לדיסקורד
     </a>
   </section>
 
@@ -328,6 +351,10 @@
         </div>
 
         <button class="btn-primary" style="width:100%" type="submit">שמור משתמש</button>
+        <button class="btn-danger" id="deleteAccountButton" type="button">
+          <i class="fa-solid fa-trash"></i>
+          מחק משתמש וכל התגובות שלי
+        </button>
       </form>
     </div>
   </div>
@@ -355,6 +382,7 @@
     const reviewerNameInput = document.getElementById("reviewerName");
     const profileNameInput = document.getElementById("profileName");
     const accountButtonText = document.getElementById("accountButtonText");
+    const deleteAccountButton = document.getElementById("deleteAccountButton");
 
     let selectedRating = 5;
     let currentUser = null;
@@ -552,6 +580,40 @@
       });
 
       loadReviews();
+    });
+
+    deleteAccountButton.addEventListener("click", async () => {
+      if (!currentUser?.id) return;
+
+      const approved = confirm(
+        "למחוק את המשתמש ואת כל הביקורות שלך? אי אפשר לבטל פעולה זו."
+      );
+
+      if (!approved) return;
+
+      const { error } = await supabaseClient
+        .from("reviews")
+        .delete()
+        .eq("user_id", currentUser.id);
+
+      if (error) {
+        console.error(error.message);
+        alert("לא ניתן למחוק את הביקורות כרגע.");
+        return;
+      }
+
+      localStorage.removeItem("falcon_user");
+      await supabaseClient.auth.signOut();
+
+      currentUser = null;
+      updateUserInterface();
+      profileModal.style.display = "none";
+      modal.style.display = "none";
+
+      await loadUser();
+      await loadReviews();
+
+      alert("המשתמש וכל הביקורות שלו נמחקו.");
     });
 
     loadUser().then(loadReviews);
