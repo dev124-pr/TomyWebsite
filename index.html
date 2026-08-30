@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FALCON GAMES</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Assistant', sans-serif;
+        }
+
+        body {
+            background-color: #0b0f19;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 90vh;
+            background: linear-gradient(rgba(11,15,25,0.4), rgba(11,15,25,0.9)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80') center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0 80px;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 55px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            line-height: 1.1;
+        }
+
+        .hero h1 span {
+            color: #00ff66;
+        }
+
+        .hero p {
+            font-size: 22px;
+            color: #c0c5d0;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .hero-features {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 35px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            color: #d0d5dd;
+        }
+
+        .feature-item i {
+            color: #00ff66;
+            font-size: 20px;
+        }
+
+        .btn-primary {
+            background-color: #00ff66;
+            color: #0b0f19;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #00cc52;
+            transform: translateY(-2px);
+        }
+
+        /* Section Titles */
+        .section-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 40px;
+        }
+
+        .center-btn {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn-secondary {
+            background-color: #131826;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            border-color: #00ff66;
+            color: #00ff66;
+        }
+
+        /* Support Section */
+        .support-section {
+            padding: 60px 50px;
+        }
+
+        .support-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .support-card {
+            background-color: #131826;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 35px 25px;
+            border-radius: 12px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .support-card i.main-icon {
+            font-size: 45px;
+            color: #00ff66;
+            margin-bottom: 20px;
+        }
+
+        .support-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .support-card p {
+            color: #98a2b3;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .support-hours {
+            color: #d0d5dd;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        /* Reviews Section */
+        .reviews-section {
+            padding: 60px 50px;
+            background-color: rgba(19, 24, 38, 0.4);
+        }
+
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .no-reviews {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #98a2b3;
+            font-size: 16px;
+            padding: 40px;
+            background-color: #131826;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .review-card {
+            background-color: #131826;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(45deg, #00ff66, #007acc);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            color: #0b0f19;
+        }
+
+        .reviewer-info h4 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .reviewer-info .stars {
+            color: #ffc107;
+            font-size: 12px;
+        }
+
+        .review-card p {
+            color: #b3b9c1;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .review-time {
+            color: #667085;
+            font-size: 12px;
+        }
+
+        /* Modal for adding review */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #131826;
+            padding: 40px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: #98a2b3;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #ffffff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #d0d5dd;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: #0b0f19;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 15px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: #00ff66;
+            outline: none;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 10px;
+            font-size: 24px;
+            color: #475467;
+            cursor: pointer;
+        }
+
+        .star-rating .star.active {
+            color: #ffc107;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #070a10;
+            padding: 30px 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #667085;
+            font-size: 14px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 800;
+            color: #00ff66;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: #ffffff;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            font-size: 20px;
+        }
+
+        .social-icons a {
+            color: #98a2b3;
+            transition: 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #00ff66;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- באנר ראשי -->
+    <section class="hero">
+        <h1>משחקים שעולים כסף,<br><span>עכשיו בחצי מחיר!</span></h1>
+        <p>הורדה מהירה, בטוחה ומקורית ישירות אליך למחשב.</p>
+        <div class="hero-features">
+            <div class="feature-item">
+                <i class="fa-solid fa-shield-halved"></i>
+                מאובטח 100% בטוח ללא וירוסים
+            </div>
+            <div class="feature-item">
+                <i class="fa-solid fa-bolt"></i>
+                מהיר - הורדה מהירה ישירות אליך
+            </div>
+            <div class="feature-item">
+                <i class="fa-solid fa-award"></i>
+                איכותי - משחקים מקוריים בגרסאות מלאות
+            </div>
+        </div>
+        <a href="https://discord.gg/ArYQsPzjSS" target="_blank" class="btn-primary">
+            <i class="fa-brands fa-discord"></i> הצטרף לקהילה בדיסקורד
+        </a>
+    </section>
+
+    <!-- שירות ותמיכה -->
+    <section class="support-section">
+        <h2 class="section-title">שירות ותמיכה</h2>
+        <div class="support-grid">
+            <div class="support-card">
+                <i class="fa-brands fa-discord main-icon"></i>
+                <div>
+                    <h3>קהילת הדיסקורד שלנו</h3>
+                    <p>הצטרפו לשרת הרשמי לתמיכה ועדכונים</p>
+                </div>
+                <a href="https://discord.gg/ArYQsPzjSS" target="_blank" class="btn-primary" style="width: 100%; justify-content: center;">
+                    <i class="fa-brands fa-discord"></i> הצטרף לשרת
+                </a>
+            </div>
+
+            <div class="support-card">
+                <i class="fa-solid fa-headset main-icon" style="color: #7289da;"></i>
+                <div>
+                    <h3>ערוצי תמיכה בדיסקורד</h3>
+                    <p>פנו לצוות שלנו ישירות בטי๊กטים בשרת</p>
+                </div>
+                <a href="https://discord.gg/ArYQsPzjSS" target="_blank" class="btn-primary" style="width: 100%; justify-content: center; background-color: #7289da; color: white;">
+                    <i class="fa-solid fa-ticket"></i> פתח טיקט תמיכה
+                </a>
+            </div>
+
+            <div class="support-card">
+                <i class="fa-solid fa-clock main-icon" style="color: #00ff66;"></i>
+                <div>
+                    <h3>שעות פעילות</h3>
+                    <p>הצוות זמין עבורכם בשעות הבאות:</p>
+                </div>
+                <div class="support-hours">
+                    א'-ה': 09:00 - 23:00<br>
+                    ו': 15:00 - 09:00<br>
+                    ש': סגור
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ביקורות לקוחות -->
+    <section class="reviews-section">
+        <h2 class="section-title">מה הלקוחות שלנו אומרים</h2>
+        <div class="reviews-grid" id="reviewsGrid">
+            <!-- הביקורות יתווספו לכאן ע"י המשתמשים -->
+        </div>
+        <div class="center-btn">
+            <button class="btn-secondary" id="openReviewModal">
+                <i class="fa-solid fa-pen"></i> הוסף ביקורת חדשה
+            </button>
+        </div>
+    </section>
+
+    <!-- חלון קופץ להוספת ביקורת -->
+    <div class="modal" id="reviewModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeReviewModal">&times;</span>
+            <h2 style="margin-bottom: 20px; font-size: 24px;">כתוב ביקורת</h2>
+            <form id="reviewForm">
+                <div class="form-group">
+                    <label>השם שלך</label>
+                    <input type="text" id="reviewerName" required placeholder="לדוגמה: ישראל ישראלי">
+                </div>
+                <div class="form-group">
+                    <label>דירוג כוכבים</label>
+                    <div class="star-rating" id="starRating">
+                        <i class="fa-solid fa-star star active" data-value="1"></i>
+                        <i class="fa-solid fa-star star active" data-value="2"></i>
+                        <i class="fa-solid fa-star star active" data-value="3"></i>
+                        <i class="fa-solid fa-star star active" data-value="4"></i>
+                        <i class="fa-solid fa-star star active" data-value="5"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>חוות דעת</label>
+                    <textarea id="reviewText" rows="4" required placeholder="ספר על החוויה שלך מהאתר והמשחקים..."></textarea>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">פרסם ביקורת</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- פוטר -->
+    <footer>
+        <div class="logo">
+            <i class="fa-solid fa-gamepad" style="font-size: 22px;"></i>
+            FALCON <span>GAMES</span>
+        </div>
+        <div class="social-icons">
+            <a href="https://discord.gg/ArYQsPzjSS" target="_blank"><i class="fa-brands fa-discord"></i></a>
+        </div>
+    </footer>
+
+    <script>
+        const modal = document.getElementById('reviewModal');
+        const openBtn = document.getElementById('openReviewModal');
+        const closeBtn = document.getElementById('closeReviewModal');
+        const reviewForm = document.getElementById('reviewForm');
+        const reviewsGrid = document.getElementById('reviewsGrid');
+        const reviewsResetKey = 'falcon_reviews_reset_v1';
+        
+        let selectedRating = 5;
+
+        // מנקה פעם אחת את ביקורות הדוגמה/הביקורות הישנות שכבר נשמרו בדפדפן.
+        // לאחר מכן כל ביקורת חדשה נשמרת כרגיל ולא תימחק.
+        function clearOldReviewsOnce() {
+            if (!localStorage.getItem(reviewsResetKey)) {
+                localStorage.removeItem('falcon_reviews');
+                localStorage.setItem(reviewsResetKey, 'true');
+            }
+        }
+
+        function loadReviews() {
+            let reviews = [];
+            const savedReviews = localStorage.getItem('falcon_reviews');
+            if (savedReviews) {
+                reviews = JSON.parse(savedReviews);
+            }
+            renderReviews(reviews);
+        }
+
+        function saveLocalReviews(reviews) {
+            localStorage.setItem('falcon_reviews', JSON.stringify(reviews));
+        }
+
+        function renderReviews(reviews) {
+            reviewsGrid.innerHTML = '';
+            
+            if (reviews.length === 0) {
+                reviewsGrid.innerHTML = `
+                    <div class="no-reviews">
+                        עדיין אין ביקורות. היו הראשונים לכתוב ביקורת על האתר!
+                    </div>
+                `;
+                return;
+            }
+
+            reviews.forEach(rev => {
+                const firstLetter = rev.name.charAt(0);
+                let starsHtml = '';
+                for (let i = 0; i < 5; i++) {
+                    if (i < rev.rating) {
+                        starsHtml += '<i class="fa-solid fa-star"></i>';
+                    } else {
+                        starsHtml += '<i class="fa-regular fa-star"></i>';
+                    }
+                }
+
+                const card = document.createElement('div');
+                card.className = 'review-card';
+                card.innerHTML = `
+                    <div class="review-header">
+                        <div class="avatar">${firstLetter}</div>
+                        <div class="reviewer-info">
+                            <h4>${rev.name}</h4>
+                            <div class="stars">${starsHtml}</div>
+                        </div>
+                    </div>
+                    <p>${rev.text}</p>
+                    <div class="review-time">${rev.time}</div>
+                `;
+                reviewsGrid.appendChild(card);
+            });
+        }
+
+        openBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        const stars = document.querySelectorAll('.star-rating .star');
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                selectedRating = parseInt(star.getAttribute('data-value'));
+                stars.forEach(s => {
+                    if (parseInt(s.getAttribute('data-value')) <= selectedRating) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        reviewForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('reviewerName').value;
+            const text = document.getElementById('reviewText').value;
+
+            const newReview = {
+                name: name,
+                rating: selectedRating,
+                text: text,
+                time: "זה עתה"
+            };
+
+            let savedReviews = JSON.parse(localStorage.getItem('falcon_reviews')) || [];
+            savedReviews.unshift(newReview);
+            saveLocalReviews(savedReviews);
+
+            renderReviews(savedReviews);
+
+            reviewForm.reset();
+            modal.style.display = 'none';
+            selectedRating = 5;
+            stars.forEach(s => s.classList.add('active'));
+        });
+
+        clearOldReviewsOnce();
+        loadReviews();
+    </script>
+</body>
+</html>
