@@ -21,6 +21,13 @@
             overflow-x: hidden;
         }ש
 
+        .account-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+
         a {
             text-decoration: none;
             color: inherit;
@@ -367,6 +374,10 @@
     </style>
 </head>
 <body>
+    <button class="btn-secondary account-button" id="accountButton">
+        <i class="fa-solid fa-user"></i>
+        <span id="accountButtonText">יצירת משתמש</span>
+    </button>
 
     <!-- באנר ראשי -->
     <section class="hero">
@@ -452,8 +463,8 @@
             <h2 style="margin-bottom: 20px; font-size: 24px;">כתוב ביקורת</h2>
             <form id="reviewForm">
                 <div class="form-group">
-                    <label>השם שלך</label>
-                    <input type="text" id="reviewerName" required placeholder="לדוגמה: ישראל ישראלי">
+                    <label>שם המשתמש שלך</label>
+                    <input type="text" id="reviewerName" disabled>
                 </div>
                 <div class="form-group">
                     <label>דירוג כוכבים</label>
@@ -470,6 +481,21 @@
                     <textarea id="reviewText" rows="4" required placeholder="ספר על החוויה שלך מהאתר והמשחקים..."></textarea>
                 </div>
                 <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">פרסם ביקורת</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- חלון יצירת משתמש -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeProfileModal">&times;</span>
+            <h2 style="margin-bottom: 20px; font-size: 24px;">יצירת משתמש</h2>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label>השם שיופיע בביקורות</label>
+                    <input type="text" id="profileName" required minlength="2" maxlength="50" placeholder="לדוגמה: ישראל ישראלי">
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">שמור משתמש</button>
             </form>
         </div>
     </div>
@@ -491,11 +517,40 @@
         const closeBtn = document.getElementById('closeReviewModal');
         const reviewForm = document.getElementById('reviewForm');
         const reviewsGrid = document.getElementById('reviewsGrid');
+        const reviewerNameInput = document.getElementById('reviewerName');
+        const accountButton = document.getElementById('accountButton');
+        const accountButtonText = document.getElementById('accountButtonText');
+        const profileModal = document.getElementById('profileModal');
+        const closeProfileModal = document.getElementById('closeProfileModal');
+        const profileForm = document.getElementById('profileForm');
+        const profileNameInput = document.getElementById('profileName');
         const supabaseUrl = 'https://dfokcbgnjlmdnpbrocel.supabase.co';
         const supabasePublishableKey = 'sb_publishable_PEIVPJZOX4AuA7vSymyxMQ_YLeXbpoy';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabasePublishableKey);
         
         let selectedRating = 5;
+        let currentUser = null;
+
+        function updateUserInterface() {
+            const name = currentUser ? currentUser.name : '';
+            reviewerNameInput.value = name;
+            accountButtonText.textContent = name || 'יצירת משתמש';
+        }
+
+        function openProfileModal() {
+            profileNameInput.value = currentUser ? currentUser.name : '';
+            profileModal.style.display = 'flex';
+            profileNameInput.focus();
+        }
+
+        function loadUser() {
+            try {
+                currentUser = JSON.parse(localStorage.getItem('falcon_user'));
+            } catch {
+                currentUser = null;
+            }
+            updateUserInterface();
+        }
 
         async function loadReviews() {
             const { data: reviews, error } = await supabaseClient
@@ -557,6 +612,28 @@
         }
 
         openBtn.addEventListener('click', () => {
+            if (!currentUser || !currentUser.name) {
+                openProfileModal();
+                return;
+            }
+            modal.style.display = 'flex';
+        });
+
+        accountButton.addEventListener('click', openProfileModal);
+
+        closeProfileModal.addEventListener('click', () => {
+            profileModal.style.display = 'none';
+        });
+
+        profileForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = profileNameInput.value.trim();
+            if (name.length < 2) return;
+
+            currentUser = { name };
+            localStorage.setItem('falcon_user', JSON.stringify(currentUser));
+            updateUserInterface();
+            profileModal.style.display = 'none';
             modal.style.display = 'flex';
         });
 
@@ -567,6 +644,9 @@
         window.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.style.display = 'none';
+            }
+            if (e.target === profileModal) {
+                profileModal.style.display = 'none';
             }
         });
 
@@ -586,7 +666,11 @@
 
         reviewForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('reviewerName').value.trim();
+            if (!currentUser || !currentUser.name) {
+                openProfileModal();
+                return;
+            }
+            const name = currentUser.name;
             const text = document.getElementById('reviewText').value.trim();
 
             const { error } = await supabaseClient.from('reviews').insert({
@@ -608,6 +692,7 @@
             loadReviews();
         });
 
+        loadUser();
         loadReviews();
     </script>
 </body>
